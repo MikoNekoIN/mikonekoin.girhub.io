@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог VPN-сервисов</title>
+    <!-- Подключение Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Подключение шрифта Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Темно-синий фон */
+        }
+        /* Стилизация placeholder'ов для лучшей видимости на темном фоне */
+        ::-webkit-input-placeholder { /* Edge */
+          color: #9ca3af;
+        }
+        :-ms-input-placeholder { /* Internet Explorer 10-11 */
+          color: #9ca3af;
+        }
+        ::placeholder {
+          color: #9ca3af;
+        }
+        /* Плавные переходы для карточек */
+        .vpn-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .vpn-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        /* Скрытие стрелок у input type="number" */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        input[type=number] {
+          -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <!-- Заголовок -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Каталог VPN-сервисов</h1>
+            <p class="text-lg text-gray-400">Найдите лучший VPN по вашим критериям</p>
+            <p class="text-sm text-gray-500 mt-4">Ссылки размещаются без реферальных ссылок и промокодов.</p>
+        </header>
+
+        <!-- Панель фильтров -->
+        <section id="filters" class="bg-gray-800 p-6 rounded-xl shadow-lg mb-8 sticky top-4 z-10">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+                <!-- Фильтр по названию -->
+                <div>
+                    <label for="search-name" class="block mb-2 text-sm font-medium text-gray-300">Поиск по названию</label>
+                    <input type="text" id="search-name" placeholder="Например, SuperVPN" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+
+                <!-- Фильтры по цене -->
+                <div>
+                    <label for="max-price-month" class="block mb-2 text-sm font-medium text-gray-300">Цена за месяц (до $)</label>
+                    <input type="number" id="max-price-month" placeholder="5" min="0" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+                <div>
+                    <label for="max-price-year" class="block mb-2 text-sm font-medium text-gray-300">Цена за год (до $)</label>
+                    <input type="number" id="max-price-year" placeholder="50" min="0" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+
+                <!-- Фильтры по триалу -->
+                <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+                    <div class="flex-grow">
+                        <label for="min-trial-days" class="block mb-2 text-sm font-medium text-gray-300">Триал (от дней)</label>
+                        <input type="number" id="min-trial-days" placeholder="3" min="0" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    </div>
+                     <div class="flex items-center">
+                        <input id="has-trial" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-600 ring-offset-gray-800 focus:ring-2">
+                        <label for="has-trial" class="ml-2 text-sm font-medium text-gray-300">Есть триал</label>
+                    </div>
+                </div>
+            </div>
+             <!-- Кнопки управления -->
+            <div class="flex justify-center mt-6 gap-4">
+                 <button id="reset-filters" class="py-2.5 px-5 text-sm font-medium text-white focus:outline-none bg-red-600 rounded-lg border border-red-600 hover:bg-red-700 focus:z-10 focus:ring-4 focus:ring-red-500">Сбросить фильтры</button>
+            </div>
+        </section>
+
+        <!-- Секция для вывода карточек -->
+        <main id="vpn-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+            <!-- Карточки будут добавлены сюда с помощью JavaScript -->
+        </main>
+        
+        <!-- Сообщение, если ничего не найдено -->
+        <div id="no-results" class="hidden text-center py-16">
+            <p class="text-2xl text-gray-400">По вашему запросу ничего не найдено.</p>
+            <p class="text-gray-500 mt-2">Попробуйте изменить параметры фильтрации.</p>
+        </div>
+
+        <!-- Футер -->
+        <footer class="text-center border-t border-gray-700 pt-8 mt-12">
+            <p class="text-gray-500">
+                Есть сервис которого нет в списке? Пишите на почту 
+                <a href="mailto:contact@example.com" class="text-blue-400 hover:underline">contact@example.com</a>
+            </p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Начальные данные (можно получать с сервера)
+            const vpnServices = [
+                {
+                    name: "SecureNet VPN",
+                    description: "Высокая скорость и шифрование военного уровня для полной анонимности.",
+                    links: {
+                        telegram: "https://t.me/example_bot",
+                        android: "https://play.google.com/store/apps/details?id=com.example.app1"
+                    },
+                    price: { month: 4.99, year: 49.99 },
+                    trial: { available: true, days: 7 }
+                },
+                {
+                    name: "Ghost VPN",
+                    description: "Простой и удобный бот для быстрого подключения к VPN.",
+                    links: {
+                        telegram: "https://t.me/example_bot2",
+                        android: null
+                    },
+                    price: { month: 3.50, year: 35.00 },
+                    trial: { available: true, days: 1 }
+                },
+                {
+                    name: "Android Shield",
+                    description: "Специализированное приложение для Android с оптимизацией под мобильные сети.",
+                    links: {
+                        telegram: null,
+                        android: "https://play.google.com/store/apps/details?id=com.example.app2"
+                    },
+                    price: { month: 5.00, year: 55.00 },
+                    trial: { available: false, days: 0 }
+                },
+                {
+                    name: "Privacy Guard",
+                    description: "Полная конфиденциальность без логов и ограничений.",
+                    links: {
+                        telegram: "https://t.me/example_bot3",
+                        android: "https://play.google.com/store/apps/details?id=com.example.app3"
+                    },
+                    price: { month: 10.00, year: 100.00 },
+                    trial: { available: true, days: 3 }
+                },
+                {
+                    name: "FreeDom VPN",
+                    description: "Бюджетный вариант с хорошим качеством соединения.",
+                    links: {
+                        telegram: "https://t.me/example_bot4",
+                        android: null
+                    },
+                    price: { month: 2.00, year: 20.00 },
+                    trial: { available: false, days: 0 }
+                },
+                {
+                    name: "Ultra Connect",
+                    description: "Максимальная скорость для стриминга и игр. Премиум-сегмент.",
+                    links: {
+                        telegram: "https://t.me/example_bot5",
+                        android: "https://play.google.com/store/apps/details?id=com.example.app5"
+                    },
+                    price: { month: 12.99, year: 120.00 },
+                    trial: { available: true, days: 14 }
+                },
+                {
+                    name: "Simple VPN Bot",
+                    description: "Ничего лишнего. Просто надежный VPN в вашем Telegram.",
+                    links: {
+                        telegram: "https://t.me/example_bot6",
+                        android: null
+                    },
+                    price: { month: 2.50, year: 24.00 },
+                    trial: { available: true, days: 2 }
+                },
+                 {
+                    name: "Mobile First VPN",
+                    description: "Лучшее решение для защиты трафика на вашем смартфоне.",
+                    links: {
+                        telegram: null,
+                        android: "https://play.google.com/store/apps/details?id=com.example.app7"
+                    },
+                    price: { month: 3.99, year: 40.00 },
+                    trial: { available: true, days: 3 }
+                }
+            ];
+
+            const vpnListContainer = document.getElementById('vpn-list');
+            const noResultsContainer = document.getElementById('no-results');
+            
+            // Элементы фильтров
+            const searchInput = document.getElementById('search-name');
+            const maxPriceMonthInput = document.getElementById('max-price-month');
+            const maxPriceYearInput = document.getElementById('max-price-year');
+            const hasTrialCheckbox = document.getElementById('has-trial');
+            const minTrialDaysInput = document.getElementById('min-trial-days');
+            const resetFiltersButton = document.getElementById('reset-filters');
+
+            // Иконки (SVG)
+            const telegramIcon = `<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.9999 0C5.3726 0 0 5.3726 0 11.9999C0 18.6272 5.3726 23.9998 11.9999 23.9998C18.6272 23.9998 23.9998 18.6272 23.9998 11.9999C23.9998 5.3726 18.6272 0 11.9999 0ZM17.166 8.3338L14.9329 17.0784C14.7197 17.9252 14.1568 18.0933 13.4334 17.6534L10.6338 15.3414L9.2783 16.6439C9.0975 16.8247 8.938 16.9842 8.5833 16.9842L8.7869 14.1207L14.7351 8.8703C15.0684 8.5796 14.6592 8.4116 14.2292 8.7023L7.0292 13.2534L4.2933 12.3338C3.4678 12.0641 3.4465 11.396 4.4533 10.9773L16.0392 6.5518C16.7413 6.2611 17.4363 6.6418 17.166 8.3338Z"/></svg>`;
+            const androidIcon = `<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.7,12.45a5.8,5.8,0,0,0-1.2-3.23,6,6,0,0,0-4.47-2.3,1.5,1.5,0,0,0-.49,0,5.8,5.8,0,0,0-5.17,2.27A5.8,5.8,0,0,0,6.15,12.45,1,1,0,0,0,6,12.71v2.92a1.2,1.2,0,0,0,1.2,1.2H8.6a1,1,0,0,0,.75-.33,3.31,3.31,0,0,1,5.2,0,1,1,0,0,0,.75.33h1.43a1.2,1.2,0,0,0,1.2-1.2V12.71A1,1,0,0,0,18.7,12.45ZM9.4,9.63a.8.8,0,1,1,.8.8A.8.8,0,0,1,9.4,9.63Zm5.2,0a.8.8,0,1,1,.8.8A.8.8,0,0,1,14.6,9.63Z"/></svg>`;
+
+            // Функция для отрисовки карточек
+            const renderServices = (services) => {
+                vpnListContainer.innerHTML = '';
+                if (services.length === 0) {
+                    noResultsContainer.classList.remove('hidden');
+                    return;
+                }
+                noResultsContainer.classList.add('hidden');
+
+                services.forEach(service => {
+                    const card = document.createElement('article');
+                    card.className = 'vpn-card bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col';
+                    
+                    const trialInfo = service.trial.available 
+                        ? `<span class="bg-green-500 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">Триал: ${service.trial.days} д.</span>`
+                        : `<span class="bg-red-500 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">Без триала</span>`;
+                    
+                    const telegramLink = service.links.telegram
+                        ? `<a href="${service.links.telegram}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 transition-colors">${telegramIcon}</a>` : '';
+                    
+                    const androidLink = service.links.android
+                        ? `<a href="${service.links.android}" target="_blank" rel="noopener noreferrer" class="text-green-400 hover:text-green-300 transition-colors">${androidIcon}</a>` : '';
+
+                    card.innerHTML = `
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-start mb-2">
+                                <h2 class="text-2xl font-bold text-white">${service.name}</h2>
+                                ${trialInfo}
+                            </div>
+                            <p class="text-gray-400 mb-4">${service.description}</p>
+                        </div>
+                        <div class="mt-auto">
+                           <div class="flex justify-between items-center text-lg mb-4 border-t border-gray-700 pt-4 mt-4">
+                                <div class="text-center">
+                                    <p class="text-sm text-gray-400">Месяц</p>
+                                    <p class="font-semibold text-white">$${service.price.month.toFixed(2)}</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-sm text-gray-400">Год</p>
+                                    <p class="font-semibold text-white">$${service.price.year.toFixed(2)}</p>
+                                </div>
+                            </div>
+                             <div class="flex items-center justify-end gap-4">
+                                ${telegramLink}
+                                ${androidLink}
+                            </div>
+                        </div>
+                    `;
+                    vpnListContainer.appendChild(card);
+                });
+            };
+
+            // Функция фильтрации
+            const applyFilters = () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const maxMonth = parseFloat(maxPriceMonthInput.value);
+                const maxYear = parseFloat(maxPriceYearInput.value);
+                const hasTrial = hasTrialCheckbox.checked;
+                const minDays = parseInt(minTrialDaysInput.value);
+
+                const filteredServices = vpnServices.filter(service => {
+                    const nameMatch = service.name.toLowerCase().includes(searchTerm);
+                    const monthPriceMatch = isNaN(maxMonth) || service.price.month <= maxMonth;
+                    const yearPriceMatch = isNaN(maxYear) || service.price.year <= maxYear;
+                    const trialAvailableMatch = !hasTrial || service.trial.available;
+                    const trialDaysMatch = isNaN(minDays) || (service.trial.available && service.trial.days >= minDays);
+
+                    return nameMatch && monthPriceMatch && yearPriceMatch && trialAvailableMatch && trialDaysMatch;
+                });
+                
+                renderServices(filteredServices);
+            };
+            
+            // Функция сброса фильтров
+            const resetFilters = () => {
+                searchInput.value = '';
+                maxPriceMonthInput.value = '';
+                maxPriceYearInput.value = '';
+                hasTrialCheckbox.checked = false;
+                minTrialDaysInput.value = '';
+                renderServices(vpnServices);
+            };
+
+            // Навешиваем обработчики событий
+            [searchInput, maxPriceMonthInput, maxPriceYearInput, minTrialDaysInput].forEach(input => {
+                input.addEventListener('input', applyFilters);
+            });
+            hasTrialCheckbox.addEventListener('change', applyFilters);
+            resetFiltersButton.addEventListener('click', resetFilters);
+
+            // Первая отрисовка
+            renderServices(vpnServices);
+        });
+    </script>
+</body>
+</html>
+
+
